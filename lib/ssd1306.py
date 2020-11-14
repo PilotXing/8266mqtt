@@ -126,6 +126,29 @@ class SSD1306:
     def blit(self, fbuf, x, y):
         self.framebuf.blit(fbuf, x, y)
 
+    def new_line(self, new_string):
+        """
+        docstring
+        """
+        self.scroll(0, 9)
+        self.fill_rect(0, 0, 128, 8, 0)
+        self.framebuf.text(new_string, 0, 0)
+        self.show()
+
+    def text_multi_line(self, new_string, row):
+        """
+        docstring
+        """
+        self.framebuf.fill(0)
+        p = 2
+        y = 9 * row
+        while len(new_string) > p+16:
+            self.framebuf.text(new_string[p:p+16], 0, y, 1)
+            p += 16
+            y += 9
+        # if p != len(new_string):
+        self.framebuf.text(new_string[p:-1], 0, y, 1)
+
 
 class SSD1306_I2C(SSD1306):
     def __init__(self, width, height, i2c, addr=0x3c, external_vcc=False):

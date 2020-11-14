@@ -5,7 +5,7 @@ from lib.ssd1306 import SSD1306, SSD1306_I2C
 from machine import I2C, Pin, Timer, reset
 
 last_message = 0
-message_interval = 5
+message_interval = 9
 counter = 0
 
 # init_ssd1306
@@ -19,9 +19,11 @@ def sub_cb(topic, msg):
     call back
     """
     print(topic, msg)
-    s.fill(0)
-    s.text(msg+topic, 0, 0)
-    s.show()
+    if topic == b"1":
+        pass
+    if topic == b"topic":
+        s.text_multi_line("{}".format(msg), 0)
+        s.show()
 
 
 def connect():
@@ -29,11 +31,11 @@ def connect():
     docstring
     """
     c = MQTTClient(info.CLIENT_ID, info.SERVER, info.PORT,
-                   user=info.USER_NAME, password=info.PASSWORD, keepalive=60)
+                   user=info.USER_NAME, password=info.PASSWORD, keepalive=10)
     c.set_callback(sub_cb)
     c.connect()
     c.subscribe(info.TOPIC)
-    c.publish(info.TOPIC, "!!!!!!!!!!!!!!")
+    c.publish(info.TOPIC, "X"*192)
     return c
 
 
@@ -53,7 +55,8 @@ while True:
         client.check_msg()
         if (time.time() - last_message) > message_interval:
             msg = b'Hello #%d' % counter
-            client.publish(info.TOPIC, msg)
+            client.ping()
+            print(msg)
             last_message = time.time()
             counter += 1
     except OSError as e:
